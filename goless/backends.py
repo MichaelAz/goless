@@ -68,7 +68,9 @@ class Backend(object):
 # so don't worry about covering it.
 def _make_stackless():  # pragma: no cover
     import stackless
-
+    
+    deadlock_errtypes = (RuntimeError,)
+    
     class StacklessChannel(stackless.channel):
         def send(self, value):
             with as_deadlock(RuntimeError):
@@ -94,14 +96,13 @@ def _make_stackless():  # pragma: no cover
             return StacklessChannel()
 
         def yield_(self):
-            try:
-                return stackless.schedule()
-            except RuntimeError as ex:
-                import pdb
-                pdb.set_trace()
-                if ex.args[0] != 'No runnable tasklets left.':
-                    pass
-                raise
+            with as_deadlock(deadlock_errtypes):
+                try:
+                    return stackless.schedule()
+                except RuntimeError as ex:
+                    if ex.args[0] != 'No runnable tasklets left.':
+                        pass
+                    raise
 
         def resume(self, tasklet):
             tasklet.run()

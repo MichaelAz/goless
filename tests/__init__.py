@@ -1,5 +1,6 @@
 import unittest
 
+from goless.backends import Deadlock
 from goless.backends import current as be
 
 
@@ -12,13 +13,17 @@ class BaseTests(unittest.TestCase):
     """
 
     def setUp(self):
-        # The yield fails with an exception in stackless.py if no tasklets are running.
+        # These yields fail with an exception in stackless.py if no tasklets are running.
         # Since we yield to make sure that's the case, we can swallow the exception.
         try:
             be.yield_()
-        except RuntimeError:
+        except Deadlock:
             pass
 
         def doyield():
-            be.yield_()
+            try:
+                be.yield_()
+            except Deadlock:
+                pass
+
         self.addCleanup(doyield)
