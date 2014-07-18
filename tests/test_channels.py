@@ -37,6 +37,7 @@ class ChanTestMixin(object):
         data2send = list(range(sendCount))
         for data in data2send:
             be.run(chan.send, data)
+            
         chan.close()
         items = [o for o in chan]
         self.assertEqual(items, data2send)

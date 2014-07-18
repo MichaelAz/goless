@@ -12,7 +12,12 @@ class BaseTests(unittest.TestCase):
     """
 
     def setUp(self):
-        be.yield_()
+        # The yield fails with an exception in stackless.py if no tasklets are running.
+        # Since we yield to make sure that's the case, we can swallow the exception.
+        try:
+            be.yield_()
+        except RuntimeError:
+            pass
 
         def doyield():
             be.yield_()

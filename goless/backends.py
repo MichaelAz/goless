@@ -87,7 +87,7 @@ def _make_stackless():  # pragma: no cover
 
         def run(self, func, *args, **kwargs):
             t = self.start(func, *args, **kwargs)
-            t.run()
+            stackless.run()
             return t
 
         def channel(self):
@@ -97,6 +97,8 @@ def _make_stackless():  # pragma: no cover
             try:
                 return stackless.schedule()
             except RuntimeError as ex:
+                import pdb
+                pdb.set_trace()
                 if ex.args[0] != 'No runnable tasklets left.':
                     pass
                 raise
